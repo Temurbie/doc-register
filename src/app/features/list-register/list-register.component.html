@@ -1,58 +1,71 @@
-
 <div class="wrapper">
-    <div class="container">
-        <div class="header">
-            <div class="list-title">
-                <h3>{{title}}</h3>
-            </div>
-            <div class="list-add-btn">
-                <button mat-raised-button (click)="openPopUp()" class="primary">Добавит</button>
-            </div>
-        </div>
-        <div  *ngIf="dataSource.length > 0; else noData" class="list-table">
-            <table [dataSource]="dataSource" mat-table>
-                <ng-container matColumnDef="file">
-                  <th mat-header-cell *matHeaderCellDef> Файл </th>
-                  <td mat-cell *matCellDef="let element"> {{element.file}} </td>
-                </ng-container>
-            
-                <ng-container matColumnDef="Reg.No.">
-                  <th mat-header-cell *matHeaderCellDef> Рег.№ </th>
-                  <td mat-cell *matCellDef="let element"> {{element.RegNo}} </td>
-                </ng-container>
-              
+  <div class="container">
+      <div class="header">
+          <div class="list-title">
+              <h3>{{title}}</h3>
+          </div>
+          <div class="list-add-btn">
+              <button mat-raised-button (click)="openPopUp()" class="primary">Добавить</button>
+          </div>
+      </div>
+      <div class="list-table">
+        <table mat-table [dataSource]="dataSource" *ngIf="dataSource.data.length > 0; else noData" class="mat-elevation-z8" matSort>
 
-                <ng-container matColumnDef="Reg.Date">
-                  <th mat-header-cell *matHeaderCellDef> Дата рег </th>
-                  <td mat-cell *matCellDef="let element"> {{element.RegDate}} </td>
-                </ng-container>
-              
+         
+          <ng-container matColumnDef="file">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header> Файл </th>
+            <td mat-cell *matCellDef="let element">
+              <ng-container *ngIf="element.file; else noFile">
+                <mat-icon (click)="openFile(element.file)">insert_drive_file</mat-icon>
+              </ng-container>
+              <ng-template #noFile>
+                "Нет данных"
+              </ng-template>
+            </td>
+          </ng-container>
+          
+ 
+          <ng-container matColumnDef="regNo">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header> Рег.№ </th>
+            <td mat-cell *matCellDef="let element"> {{ element.regNo }} </td>
+          </ng-container>
 
-                <ng-container matColumnDef="Outgoing Doc.No.">
-                  <th mat-header-cell *matHeaderCellDef>№исх.док-та </th>
-                  <td mat-cell *matCellDef="let element"> {{element. OutgoingDocNo}} </td>
-                </ng-container>
-                <ng-container matColumnDef="Outgoing Doc.Date">
-                  <th mat-header-cell *matHeaderCellDef> Дата исх.док-та </th>
-                  <td mat-cell *matCellDef="let element"> {{element.OutgoingDocDate}} </td>
-                </ng-container>
-                <ng-container matColumnDef="Correspondent">
-                  <th mat-header-cell *matHeaderCellDef> Корреспондент </th>
-                  <td mat-cell *matCellDef="let element"> {{element.Correspondent}} </td>
-                </ng-container>
-                <ng-container matColumnDef="Subject">
-                  <th mat-header-cell *matHeaderCellDef> Тема </th>
-                  <td mat-cell *matCellDef="let element"> {{element.Subject}} </td>
-                </ng-container>
-              
-                <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-                <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-            </table>
-              
-              
-        </div>
+      
+          <ng-container matColumnDef="regDate">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header> Дата рег </th>
+            <td mat-cell *matCellDef="let element"> {{ element.regDate | date }} </td>
+          </ng-container>
+
+ 
+          <ng-container matColumnDef="outgoingDocNo">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header> №исх.док-та </th>
+            <td mat-cell *matCellDef="let element"> {{ element.docNo }} </td>
+          </ng-container>
+
+    
+          <ng-container matColumnDef="outgoingDocDate">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header> Дата исх.док-та </th>
+            <td mat-cell *matCellDef="let element"> {{ element.dataDoc | date }} </td>
+          </ng-container>
+
+          <ng-container matColumnDef="correspondent">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header> Корреспондент </th>
+            <td mat-cell *matCellDef="let element"> {{ element.correspondent }} </td>
+          </ng-container>
+
+
+          <ng-container matColumnDef="subject">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header> Тема </th>
+            <td mat-cell *matCellDef="let element"> {{ element.subject }} </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns;" style="cursor: pointer;" (dblclick)="openDocument(row)"></tr>
+        
+        </table>
         <ng-template #noData>
-            <p>{{noDataTitle}}</p>
+          <p class="p-3">Данные отсутствуют, для добавления данных нажмите кнопку "Добавить".</p>
         </ng-template>
+      </div>
     </div>
 </div>

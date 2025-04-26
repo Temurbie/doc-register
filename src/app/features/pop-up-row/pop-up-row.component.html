@@ -1,0 +1,94 @@
+
+<form [formGroup]="myFormRow">
+    <div class="main">
+      <h4 class="p-3 m-2">{{ title }}</h4>
+      <div class="wrapper">
+        <div class="container">
+          <div class="row">
+            <div class="col-12">
+                <mat-form-field class="custom-input">
+                  <mat-label>Рег.№</mat-label> 
+                  <input matInput formControlName="regNo" />
+                  <mat-error *ngIf="myFormRow.get('regNo')?.hasError('pattern')">Должны присутствовать только цифры и специальный символ (123ABC)</mat-error>
+                  <mat-error *ngIf="myFormRow.get('regNo')?.hasError('minlength')">Должен содержать не менее 5 символов</mat-error>
+                </mat-form-field>
+              </div>
+  
+            <div class="col-6">
+              <mat-form-field class="custom-input" appearance="fill">
+                <mat-label>Дата.рег</mat-label>
+                <input matInput [matDatepicker]="picker" formControlName="regDate" >
+                <mat-error *ngIf="myFormRow.get('regDate')?.hasError('notToday')" >Укажите сегодняшнюю дату</mat-error>
+                <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+                <mat-datepicker #picker></mat-datepicker>
+              </mat-form-field>
+            </div>
+  
+            <div class="col-6">
+              <mat-form-field class="custom-input">
+                <mat-label>№исх.док-та</mat-label>
+                <input matInput formControlName="docNo"  />
+                
+                <mat-error  *ngIf="myFormRow.get('docNo')?.hasError('pattern')">
+                  Пишите буквы и цифры
+                </mat-error>
+              </mat-form-field>
+             
+            </div>
+            <div class="col-12">
+                <mat-form-field class="custom-input">
+                    <mat-label>Дата исх.док-та</mat-label>
+                    <input  formControlName="dataDoc"    matInput [matDatepicker]="picker1">
+                    
+                    <mat-error *ngIf="myFormRow.get('dataDoc')?.hasError('oldinYokiHoizrgi')">Будущая дата не должна быть выбрана</mat-error>
+                    <mat-datepicker-toggle matSuffix [for]="picker1"></mat-datepicker-toggle>
+                    <mat-datepicker #picker1></mat-datepicker>
+                </mat-form-field>
+            </div>
+            
+            <div class="col-12">
+              <mat-form-field class="custom-input">
+                <mat-label>Корреспондент</mat-label>
+                <mat-select  formControlName="correspondent">
+                  <mat-option value="ЦБ">ЦБ</mat-option>
+                  <mat-option value="ГНИ">ГНИ</mat-option>
+                  <mat-option value="ТСЖ">ТСЖ</mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
+            <div class="col-12 mt-4">
+              <mat-form-field class="custom-input">
+                <mat-label>Тема</mat-label>
+                
+                <mat-error  *ngIf="myFormRow.get('subject')?.hasError('maxlength') && myFormRow.get('subject')?.touched" >не более 100 знаков</mat-error>
+                <input matInput formControlName="subject" />
+              </mat-form-field>
+            </div>
+  
+            
+            <div class="col-12">
+              <input #fileInput type="file" (change)="onFileSelected($event)"  accept=".pdf, .doc, .docx" hidden />
+              <button mat-raised-button type="button" (click)="fileInput.click()">Fayl tanlang</button>
+              <p *ngIf="selectedFileName">{{ selectedFileName }}</p>
+              <mat-error *ngIf="fileFormatError">Недопустимый формат.</mat-error>
+              <mat-error *ngIf="fileSizeError">Размер файла превышает 1Мб.</mat-error>
+            </div>
+            
+  
+            <div class="col-4 mt-2">
+              <button mat-raised-button color="primary" (click)="onSave()" type="button">Сохранть</button>
+            </div>
+            <div class="col-4 mt-2 ">
+              <button mat-raised-button color="warn" type="button" (click)="onClose()">Назад</button>
+            </div>
+            <div class="col-4 mt-2">
+              <button mat-raised-button color="accent" type="button" *ngIf="isSaved" (click)="onPrint()">
+                Принт
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </form>
+  
