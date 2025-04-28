@@ -98,46 +98,111 @@ export class PopUpComponent  implements OnInit{
   
 
   onFileSelected(event: any): void {
-    const file = event.target.files[0];
-  
-    // Format va hajmni nollashtirib boshlaymiz
+    const file = event.target.files[0] || null; // Fayl yo‘q bo‘lishi ham mumkin
+    
     this.fileFormatError = false;
     this.fileSizeError = false;
-  
+    
     if (file) {
-      const fileExtension = file.name.split('.').pop()?.toLowerCase();
-      const allowedExtensions = ['pdf', 'doc', 'docx'];
-      const maxSizeInBytes = 1 * 1024 * 1024; // 1 MB = 1048576 bytes
-  
-      // Fayl formati tekshiruvi
-      if (!allowedExtensions.includes(fileExtension || '')) {
-        this.fileFormatError = true;
-      }
-  
-      // Fayl hajmi tekshiruvi
-      if (file.size > maxSizeInBytes) {
-        this.fileSizeError = true;
-      }
-  
-      // Agar hammasi yaxshi bo‘lsa
-      if (!this.fileFormatError && !this.fileSizeError) {
-        this.myForm.patchValue({file: file})
-        this.myForm.get(file)?.updateValueAndValidity();
-        console.log('✅ Fayl to‘g‘ri: ', file.name);
-        // Faylni saqlash yoki boshqa ishlarni shu yerda qilamiz
-      }
+    const fileExtension = file.name.split('.').pop()?.toLowerCase();
+    const allowedExtensions = ['pdf', 'doc', 'docx'];
+    const maxSizeInBytes = 1 * 1024 * 1024; // 1 MB
+    
+    if (!allowedExtensions.includes(fileExtension || '')) {
+    this.fileFormatError = true;
     }
-  }
-  
-  convertFileToBase64(file: File): Promise<string | ArrayBuffer | null>{
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-  
-      reader.onload = () => resolve(reader.result);
-      reader.onerror = error => reject(error);
+    
+    if (file.size > maxSizeInBytes) {
+    this.fileSizeError = true;
+    }
+    
+    if (!this.fileFormatError && !this.fileSizeError) {
+    this.myForm.patchValue({ file: file });
+    this.myForm.get('file')?.updateValueAndValidity();
+    
+    console.log('✅ Fayl to‘g‘ri: ', file.name);
+    
+    this.convertFileToBase64(file)
+    .then(base64 => {
+    console.log('✅ Base64: ', base64);
+    // Base64 faylni kerak joyda saqlash mumkin
+    this.saveToTable(base64);
+    })
+    .catch(error => {
+    console.error('Faylni o‘qishda xato:', error);
     });
-  }
+    }
+    } else {
+    // Fayl tanlanmagan bo‘lsa ham formadagi file ni null qilib qo‘yamiz
+    this.myForm.patchValue({ file: null });
+    this.myForm.get('file')?.updateValueAndValidity();
+    
+    console.log('❗ Fayl tanlanmadi. Lekin formani saqlash davom etadi.');
+    
+    // Faylni null bo‘lsa ham Base64 ni qaytaramiz va saqlaymiz
+    this.convertFileToBase64(null)
+    .then(base64 => {
+    console.log('✅ Base64 (fayl tanlanmagan): ', base64);
+    this.saveToTable(base64);
+    })
+    .catch(error => {
+    console.error('Faylni o‘qishda xato (fayl tanlanmagan):', error);
+    });
+    }
+    }
+    
+    convertFileToBase64(file: File | null): Promise<string> {
+    return new Promise((resolve, reject) => {
+    if (!file) {
+    // Agar fayl tanlanmasa, null bo‘lsa, xato qilmang va default base64 qiymatni qaytaring
+    resolve('data:,'); // Yoki boshqa default qiymat
+    } else if (!(file instanceof Blob)) {
+    reject(new Error('Provided parameter is not a File or Blob.'));
+    } else {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    
+    reader.onload = () => {
+    if (typeof reader.result === 'string') {
+    resolve(reader.result);
+    } else {
+    reject(new Error('File reading error.'));
+    }
+    };
+    
+    reader.onerror = error => reject(error);
+    }
+    });
+    }
+    
+    // Faylni saqlash funksiyasi
+    saveToTable(base64: string): void {
+    const formData = { ...this.myForm.value, file: base64 };
+    
+    let existingData;
+    this.tableS.documentlar$.subscribe((data) => {
+    existingData = data;
+    });
+    
+    let parsedData: ConfigColmuns[] = [];
+    
+    if (existingData) {
+    try {
+    parsedData = JSON.parse(existingData);
+    if (!Array.isArray(parsedData)) {
+    parsedData = [];
+    }
+    } catch (e) {
+    console.error("Xatolik JSON parse vaqtida:", e);
+    parsedData = [];
+    }
+    }
+    
+    parsedData.push(formData); // Faylni yangi ma'lumotlar bilan saqlaymiz
+    this.tableS.saveToLocalStorage(parsedData);
+    this.isSaved = true;
+    
+    }
 
   onClose(): void {
     this.dialogRef.close();
