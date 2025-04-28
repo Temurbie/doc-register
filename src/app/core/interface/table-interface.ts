@@ -10,5 +10,5 @@ export interface ConfigColmuns {
   deadline: string;
   access: boolean;
   control: boolean;
-  file: string | null; 
+  file: File | Blob | null; 
 }
